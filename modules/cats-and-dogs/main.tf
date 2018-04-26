@@ -12,6 +12,23 @@ provider "kubernetes" {
   cluster_ca_certificate = "${base64decode(data.terraform_remote_state.k8s_cluster.k8s_master_auth_cluster_ca_certificate)}"
 }
 
+module "service-account-from-provider" {
+  source = "../service-account-from-provider"
+  count = "${1 - var.service_account_from_yaml}"
+}
+
+module "service-account-from-yaml" {
+  source = "../service-account-from-yaml"
+  private_key_data = "${var.private_key_data}"
+  count = "${var.service_account_from_yaml}"
+  master_public_dns = "${data.terraform_remote_state.k8s_cluster.master_public_dns}"
+  bastion_public_dns = "${data.terraform_remote_state.k8s_cluster.bastion_public_dns}"
+}
+
+locals {
+  secret_name = "${var.service_account_from_yaml == 0 ? module.service-account-from-provider.secret_name : module.service-account-from-yaml.secret_name}"
+}
+
 resource "kubernetes_pod" "cats-and-dogs-backend" {
   metadata {
     name = "cats-and-dogs-backend"
@@ -20,7 +37,7 @@ resource "kubernetes_pod" "cats-and-dogs-backend" {
     }
   }
   spec {
-    service_account_name = "${kubernetes_service_account.cats-and-dogs.metadata.0.name}"
+    service_account_name = "cats-and-dogs"
     container {
       image = "rberlind/cats-and-dogs-backend:k8s-auth"
       image_pull_policy = "Always"
@@ -42,7 +59,7 @@ resource "kubernetes_pod" "cats-and-dogs-backend" {
         name = "K8S_TOKEN"
         value_from {
           secret_key_ref {
-            name = "${kubernetes_service_account.cats-and-dogs.default_secret_name}"
+            name = "${local.secret_name}"
             key = "token"
           }
         }
@@ -77,7 +94,7 @@ resource "kubernetes_pod" "cats-and-dogs-frontend" {
     }
   }
   spec {
-    service_account_name = "${kubernetes_service_account.cats-and-dogs.metadata.0.name}"
+    service_account_name = "cats-and-dogs"
     container {
       image = "rberlind/cats-and-dogs-frontend:k8s-auth"
       image_pull_policy = "Always"
@@ -102,7 +119,7 @@ resource "kubernetes_pod" "cats-and-dogs-frontend" {
         name = "K8S_TOKEN"
         value_from {
           secret_key_ref {
-            name = "${kubernetes_service_account.cats-and-dogs.default_secret_name}"
+            name = "${local.secret_name}"
             key = "token"
           }
         }
@@ -130,4 +147,25 @@ resource "kubernetes_service" "cats-and-dogs-frontend" {
     }
     type = "LoadBalancer"
   }
+}
+
+resource "null_resource" "expose_route" {
+  count = "${var.service_account_from_yaml}"
+  provisioner "remote-exec" {
+    inline = [
+      "oc expose service cats-and-dogs-frontend --hostname=cats-and-dogs-frontend.${data.terraform_remote_state.k8s_cluster.master_public_ip}.xip.io"
+    ]
+  }
+
+  connection {
+    host = "${data.terraform_remote_state.k8s_cluster.master_public_dns}"
+    type = "ssh"
+    agent = false
+    user = "ec2-user"
+    private_key = "${var.private_key_data}"
+    bastion_host = "${data.terraform_remote_state.k8s_cluster.bastion_public_dns}"
+  }
+
+  depends_on = ["kubernetes_service.cats-and-dogs-frontend"]
+
 }

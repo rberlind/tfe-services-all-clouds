@@ -14,3 +14,7 @@ variable "k8s_cluster_workspace_gcp" {
 variable "k8s_cluster_workspace_aws" {
   description = "workspace to use for the OpenShift k8s cluster in AWS"
 }
+
+variable "private_key_data" {
+  description = "contents of the private key"
+}
