@@ -65,7 +65,7 @@ resource "null_resource" "get_secret_name" {
 data "null_data_source" "retrieve_secret_name_from_file" {
   #count = "${var.count}"
   inputs = {
-    secret_name = "${file("${path.module}/cats-and-dogs-secret-name")}"
+    secret_name = "${chomp(file("${path.module}/cats-and-dogs-secret-name"))}"
   }
   depends_on = ["null_resource.get_secret_name"]
 }
