@@ -21,7 +21,7 @@ variable "private_key_data" {
 
 variable "namespace_azure" {
   description "namespace to use for azure"
-  default = "default"
+  #default = "default"
 }
 
 variable "namespace_gcp" {
