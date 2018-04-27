@@ -18,3 +18,18 @@ variable "k8s_cluster_workspace_aws" {
 variable "private_key_data" {
   description = "contents of the private key"
 }
+
+variable "namespace_azure" {
+  description "namespace to use for azure"
+  default = "default"
+}
+
+variable "namespace_gcp" {
+  description "namespace to use for gcp"
+  default = "default"
+}
+
+variable "namespace_aws" {
+  description "namespace to use for aws"
+  default = "cats-and-dogs"
+}

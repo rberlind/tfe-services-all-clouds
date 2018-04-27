@@ -23,9 +23,6 @@ module "service-account-from-yaml" {
   count = "${var.service_account_from_yaml}"
   tfe_organization = "${var.tfe_organization}"
   k8s_cluster_workspace = "${var.k8s_cluster_workspace}"
-  
-  /*master_public_dns = "${data.terraform_remote_state.k8s_cluster.master_public_dns}"
-  bastion_public_dns = "${data.terraform_remote_state.k8s_cluster.bastion_public_dns}"*/
 }
 
 locals {
@@ -35,6 +32,7 @@ locals {
 resource "kubernetes_pod" "cats-and-dogs-backend" {
   metadata {
     name = "cats-and-dogs-backend"
+    namespace = "${var.namespace}"
     labels {
       App = "cats-and-dogs-backend"
     }
@@ -77,6 +75,7 @@ resource "kubernetes_pod" "cats-and-dogs-backend" {
 resource "kubernetes_service" "cats-and-dogs-backend" {
   metadata {
     name = "cats-and-dogs-backend"
+    namespace = "${var.namespace}"
   }
   spec {
     selector {
@@ -92,6 +91,7 @@ resource "kubernetes_service" "cats-and-dogs-backend" {
 resource "kubernetes_pod" "cats-and-dogs-frontend" {
   metadata {
     name = "cats-and-dogs-frontend"
+    namespace = "${var.namespace}"
     labels {
       App = "cats-and-dogs-frontend"
     }
@@ -139,6 +139,7 @@ resource "kubernetes_pod" "cats-and-dogs-frontend" {
 resource "kubernetes_service" "cats-and-dogs-frontend" {
   metadata {
     name = "cats-and-dogs-frontend"
+    namespace = "${var.namespace}"
   }
   spec {
     selector {

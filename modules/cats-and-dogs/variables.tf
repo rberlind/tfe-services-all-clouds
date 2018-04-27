@@ -14,3 +14,7 @@ variable "service_account_from_yaml" {
   # Set to 1 for OpenShift, else 0
   description = "whether to create service account from yaml"
 }
+
+variable "namespace" {
+  description = "namespace to use for cats-and-dogs apps"
+}
