@@ -8,7 +8,7 @@ data "terraform_remote_state" "k8s_cluster" {
 resource "null_resource" "service_account" {
   count = "${var.count}"
   provisioner "file" {
-    source = "cats-and-dogs.yaml"
+    source = "${path.module}/cats-and-dogs.yaml"
     destination = "~/cats-and-dogs.yaml"
   }
 
