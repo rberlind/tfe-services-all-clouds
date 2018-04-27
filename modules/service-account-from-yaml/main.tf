@@ -56,7 +56,7 @@ resource "null_resource" "get_secret_name" {
   }
 
   provisioner "local-exec" {
-    command = "scp -o StrictHostKeyChecking=no -i private-key.pem  ec2-user@${data.terraform_remote_state.k8s_cluster.bastion_public_dns}:~/cats-and-dogs-secret-name cats-and-dogs-secret-name"
+    command = "scp -o StrictHostKeyChecking=no -i private-key.pem  ec2-user@${data.terraform_remote_state.k8s_cluster.bastion_public_dns}:~/cats-and-dogs-secret-name ${path.module}/cats-and-dogs-secret-name"
   }
 
   depends_on = ["null_resource.service_account"]
