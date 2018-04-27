@@ -20,16 +20,16 @@ variable "private_key_data" {
 }
 
 variable "namespace_azure" {
-  description "namespace to use for azure"
-  #default = "default"
+  description = "namespace to use for azure"
+  default = "default"
 }
 
 variable "namespace_gcp" {
-  description "namespace to use for gcp"
+  description = "namespace to use for gcp"
   default = "default"
 }
 
 variable "namespace_aws" {
-  description "namespace to use for aws"
+  description = "namespace to use for aws"
   default = "cats-and-dogs"
 }
