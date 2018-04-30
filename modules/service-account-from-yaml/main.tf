@@ -1,9 +1,9 @@
-data "terraform_remote_state" "k8s_cluster" {
+/*data "terraform_remote_state" "k8s_cluster" {
   backend = "atlas"
   config {
     name = "${var.tfe_organization}/${var.k8s_cluster_workspace}"
   }
-}
+}*/
 
 resource "null_resource" "service_account" {
   count = "${var.count}"
@@ -63,7 +63,7 @@ resource "null_resource" "get_secret_name" {
 }
 
 data "null_data_source" "retrieve_secret_name_from_file" {
-  #count = "${var.count}"
+  count = "${var.count}"
   inputs = {
     secret_name = "${chomp(file("${path.module}/cats-and-dogs-secret-name"))}"
   }
