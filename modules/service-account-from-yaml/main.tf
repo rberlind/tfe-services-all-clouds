@@ -32,7 +32,7 @@ resource "null_resource" "get_secret_name" {
     ]
 
     connection {
-      host = "${var.master_public_dns}"
+      host = "${var.bastion_public_dns}"
       type = "ssh"
       agent = false
       user = "ec2-user"
