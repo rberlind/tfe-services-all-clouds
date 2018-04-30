@@ -21,8 +21,10 @@ module "service-account-from-yaml" {
   source = "../service-account-from-yaml"
   private_key_data = "${var.private_key_data}"
   count = "${var.service_account_from_yaml}"
-  tfe_organization = "${var.tfe_organization}"
-  k8s_cluster_workspace = "${var.k8s_cluster_workspace}"
+  /*tfe_organization = "${var.tfe_organization}"
+  k8s_cluster_workspace = "${var.k8s_cluster_workspace}"*/
+  master_public_dns = "${var.service_account_from_yaml == 1 ? data.terraform_remote_state.k8s_cluster.master_public_dns : ""}"
+  bastion_public_dns = "${var.service_account_from_yaml == 1 ? data.terraform_remote_state.k8s_cluster.bastion_public_dns : ""}"
 }
 
 locals {
