@@ -15,12 +15,12 @@ resource "null_resource" "service_account" {
   }
 
   connection {
-    host = "${data.terraform_remote_state.k8s_cluster.master_public_dns}"
+    host = "${var.master_public_dns}"
     type = "ssh"
     agent = false
     user = "ec2-user"
     private_key = "${var.private_key_data}"
-    bastion_host = "${data.terraform_remote_state.k8s_cluster.bastion_public_dns}"
+    bastion_host = "${var.bastion_public_dns}"
   }
 }
 
@@ -28,11 +28,11 @@ resource "null_resource" "get_secret_name" {
   count = "${var.count}"
   provisioner "remote-exec" {
     inline = [
-      "scp -o StrictHostKeyChecking=no -i ~/.ssh/private-key.pem ec2-user@${data.terraform_remote_state.k8s_cluster.master_public_dns}:~/cats-and-dogs-secret-name cats-and-dogs-secret-name"
+      "scp -o StrictHostKeyChecking=no -i ~/.ssh/private-key.pem ec2-user@${var.master_public_dns}:~/cats-and-dogs-secret-name cats-and-dogs-secret-name"
     ]
 
     connection {
-      host = "${data.terraform_remote_state.k8s_cluster.bastion_public_dns}"
+      host = "${var.master_public_dns}"
       type = "ssh"
       agent = false
       user = "ec2-user"
@@ -49,14 +49,14 @@ resource "null_resource" "get_secret_name" {
   }
 
   provisioner "local-exec" {
-    command = "scp -o StrictHostKeyChecking=no -i private-key.pem  ec2-user@${data.terraform_remote_state.k8s_cluster.bastion_public_dns}:~/cats-and-dogs-secret-name ${path.module}/cats-and-dogs-secret-name"
+    command = "scp -o StrictHostKeyChecking=no -i private-key.pem  ec2-user@${var.bastion_public_dns}:~/cats-and-dogs-secret-name ${path.module}/cats-and-dogs-secret-name"
   }
 
   depends_on = ["null_resource.service_account"]
 }
 
 data "null_data_source" "retrieve_secret_name_from_file" {
-  count = "${var.count}"
+  #count = "${var.count}"
   inputs = {
     secret_name = "${chomp(file("${path.module}/cats-and-dogs-secret-name"))}"
   }
